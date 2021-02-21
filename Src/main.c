@@ -92,6 +92,7 @@ int main(void)
   MX_CAN_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+	//初始化 CAN_TxHeaderTypeDef 发送数据函数
 	CAN_TxHeaderTypeDef CAN_TxHeaderSend;
 	
 	CAN_TxHeaderSend.StdId = 0x01;
