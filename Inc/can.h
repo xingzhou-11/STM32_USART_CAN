@@ -33,6 +33,8 @@
 extern CAN_HandleTypeDef hcan;
 
 /* USER CODE BEGIN Private defines */
+extern CAN_FilterTypeDef CAN_FilterInit;
+extern CAN_RxHeaderTypeDef CAN_RxHeaderSend;
 
 /* USER CODE END Private defines */
 

@@ -26,6 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -47,6 +48,9 @@
 
 /* USER CODE BEGIN PV */
 uint32_t TxMailbox;
+
+uint8_t TxData[8] = {0x10,0x12};
+uint8_t RxData[8];
 
 /* USER CODE END PV */
 
@@ -100,6 +104,9 @@ int main(void)
 	CAN_TxHeaderSend.IDE   = CAN_ID_STD;
 	CAN_TxHeaderSend.RTR   = CAN_RTR_DATA;
 	CAN_TxHeaderSend.DLC   = 8;
+	
+	Filter_Init();
+	HAL_CAN_Start(&hcan);
 
   /* USER CODE END 2 */
 
@@ -108,7 +115,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		HAL_CAN_AddTxMessage(&hcan, &CAN_TxHeaderSend, (uint8_t *)"asd", &TxMailbox);
+//		HAL_CAN_AddTxMessage(&hcan, &CAN_TxHeaderSend, TxData, &TxMailbox);
+//		HAL_Delay(1000);
 
     /* USER CODE BEGIN 3 */
   }
@@ -153,6 +161,15 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &CAN_RxHeaderSend, RxData);
+	if(RxData[0] == 0x11 && RxData[1] == 0x15) 
+	{
+		
+	}
+//	printf(" data content:Data[0] = 0x0%X, Data[1] = 0x0%X \n", RxData[0], RxData[1]);
+}
 
 /* USER CODE END 4 */
 

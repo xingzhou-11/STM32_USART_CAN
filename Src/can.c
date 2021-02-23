@@ -21,6 +21,7 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
+CAN_RxHeaderTypeDef CAN_RxHeaderSend;
 
 /* USER CODE END 0 */
 
@@ -119,6 +120,8 @@ void Filter_Init()
 	CAN_FilterInit.FilterMode           = CAN_FILTERMODE_IDMASK;
 	CAN_FilterInit.FilterScale          = CAN_FILTERSCALE_16BIT;
 	CAN_FilterInit.FilterActivation     = CAN_FILTER_ENABLE;
+	
+	HAL_CAN_ConfigFilter(&hcan, &CAN_FilterInit);
 }
 
 //void Send_Message()

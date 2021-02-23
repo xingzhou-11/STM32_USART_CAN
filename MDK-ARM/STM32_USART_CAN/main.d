@@ -30,3 +30,4 @@ stm32_usart_can\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 stm32_usart_can\main.o: ../Inc/can.h
 stm32_usart_can\main.o: ../Inc/usart.h
 stm32_usart_can\main.o: ../Inc/gpio.h
+stm32_usart_can\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
