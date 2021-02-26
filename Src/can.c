@@ -21,7 +21,10 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
+CAN_TxHeaderTypeDef CAN_TxHeaderSend;
 CAN_RxHeaderTypeDef CAN_RxHeaderSend;
+
+uint8_t TxData[8] = {0x10,0x12};
 
 /* USER CODE END 0 */
 
@@ -33,7 +36,7 @@ void MX_CAN_Init(void)
 
   hcan.Instance = CAN1;
   hcan.Init.Prescaler = 2;
-  hcan.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
@@ -77,6 +80,15 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+    /* CAN1 interrupt Init */
+    HAL_NVIC_SetPriority(USB_HP_CAN1_TX_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USB_HP_CAN1_TX_IRQn);
+    HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
+    HAL_NVIC_SetPriority(CAN1_SCE_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(CAN1_SCE_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
   /* USER CODE END CAN1_MspInit 1 */
@@ -100,6 +112,11 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
 
+    /* CAN1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(USB_HP_CAN1_TX_IRQn);
+    HAL_NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
+    HAL_NVIC_DisableIRQ(CAN1_RX1_IRQn);
+    HAL_NVIC_DisableIRQ(CAN1_SCE_IRQn);
   /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
   /* USER CODE END CAN1_MspDeInit 1 */
@@ -122,18 +139,22 @@ void Filter_Init()
 	CAN_FilterInit.FilterActivation     = CAN_FILTER_ENABLE;
 	
 	HAL_CAN_ConfigFilter(&hcan, &CAN_FilterInit);
+	
+	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 }
 
-//void Send_Message()
-//{
-//	CAN_TxHeaderTypeDef CAN_TxHeaderSend;
-//	
-//	CAN_TxHeaderSend.StdId = 0x01;
-//	CAN_TxHeaderSend.ExtId = 0x00;
-//	CAN_TxHeaderSend.IDE   = CAN_ID_STD;
-//	CAN_TxHeaderSend.RTR   = CAN_RTR_DATA;
-//	CAN_TxHeaderSend.DLC   = 8;
-//}
+void Send_Message()
+{
+	uint32_t TxMailbox;
+	
+	CAN_TxHeaderSend.StdId = 0x01;
+	CAN_TxHeaderSend.ExtId = 0x00;
+	CAN_TxHeaderSend.IDE   = CAN_ID_STD;
+	CAN_TxHeaderSend.RTR   = CAN_RTR_DATA;
+	CAN_TxHeaderSend.DLC   = 8;
+	
+	HAL_CAN_AddTxMessage(&hcan, &CAN_TxHeaderSend, TxData, &TxMailbox);
+}
 
 /* USER CODE END 1 */
 

@@ -33,8 +33,6 @@
 extern CAN_HandleTypeDef hcan;
 
 /* USER CODE BEGIN Private defines */
-extern CAN_FilterTypeDef CAN_FilterInit;
-extern CAN_RxHeaderTypeDef CAN_RxHeaderSend;
 
 /* USER CODE END Private defines */
 
@@ -44,6 +42,9 @@ void MX_CAN_Init(void);
 void Filter_Init(void);
 void Send_Message(void);
 
+extern CAN_FilterTypeDef CAN_FilterInit;
+extern CAN_TxHeaderTypeDef CAN_TxHeaderSend;
+extern CAN_RxHeaderTypeDef CAN_RxHeaderSend;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
