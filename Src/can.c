@@ -24,8 +24,6 @@
 CAN_TxHeaderTypeDef CAN_TxHeaderSend;
 CAN_RxHeaderTypeDef CAN_RxHeaderSend;
 
-uint8_t TxData[8] = {0x10,0x12};
-
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;
@@ -124,6 +122,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+//过滤器配置
+//使能中断
 void Filter_Init()
 {
 	CAN_FilterTypeDef CAN_FilterInit;
@@ -143,7 +143,7 @@ void Filter_Init()
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 }
 
-void Send_Message()
+void Send_Message(uint8_t *pData)
 {
 	uint32_t TxMailbox;
 	
@@ -153,7 +153,7 @@ void Send_Message()
 	CAN_TxHeaderSend.RTR   = CAN_RTR_DATA;
 	CAN_TxHeaderSend.DLC   = 8;
 	
-	HAL_CAN_AddTxMessage(&hcan, &CAN_TxHeaderSend, TxData, &TxMailbox);
+	HAL_CAN_AddTxMessage(&hcan, &CAN_TxHeaderSend, pData, &TxMailbox);
 }
 
 /* USER CODE END 1 */

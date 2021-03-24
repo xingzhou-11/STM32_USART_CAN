@@ -49,6 +49,7 @@
 /* USER CODE BEGIN PV */
 
 uint8_t RxData[8];
+uint8_t TxData[8];
 
 /* USER CODE END PV */
 
@@ -92,19 +93,12 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_CAN_Init();
-  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-	//初始化 CAN_TxHeaderTypeDef 发送数据函数
-//	CAN_TxHeaderTypeDef CAN_TxHeaderSend;
-//	
-//	CAN_TxHeaderSend.StdId = 0x01;
-//	CAN_TxHeaderSend.ExtId = 0x00;
-//	CAN_TxHeaderSend.IDE   = CAN_ID_STD;
-//	CAN_TxHeaderSend.RTR   = CAN_RTR_DATA;
-//	CAN_TxHeaderSend.DLC   = 8;
 	
 	Filter_Init();
 	HAL_CAN_Start(&hcan);
+	HAL_UART_Receive_IT(&huart2, RxData, 8);
 
   /* USER CODE END 2 */
 
@@ -112,9 +106,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    Send_Message();
-		HAL_Delay(1000);
-		/* USER CODE END WHILE */
+//    Send_Message();
+//		printf("Program_running\n");
+//		HAL_Delay(1000);
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -159,14 +154,40 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+//CAN中断回调函数
+//CAN接收数据传入RxData
+//串口打印can数据
+//将数组RxData清零
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &CAN_RxHeaderSend, RxData);
-	if(RxData[0] == 0x01 && RxData[1] == 0x02) 
+	HAL_UART_Transmit(&huart2, RxData, 8, 0xffff);
+//	printf("%x %x %x %x %x %x %x %x\n", RxData[0],RxData[1],RxData[2],RxData[3],RxData[4],RxData[5],RxData[6],RxData[7]);
+	
+	for(uint8_t i=0; i<8; i++)
 	{
-		Send_Message();
+		RxData[i] = 0;
 	}
-//	printf(" data content:Data[0] = 0x0%X, Data[1] = 0x0%X \n", RxData[0], RxData[1]);
+}
+
+//串口中断回调函数
+//串口接收数据传入RxData
+//确认串口总线空闲
+//CAN将数据传出
+//将数组RxData清零
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+
+	HAL_UART_Receive_IT(&huart2, RxData, 8);
+	while(__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE) == 1);
+	HAL_UART_Transmit(&huart2, RxData, 8, 0xffff);
+	Send_Message(RxData);
+	
+	for(uint8_t i=0; i<8; i++)
+	{
+		RxData[i] = 0;
+	}
+	
 }
 
 /* USER CODE END 4 */

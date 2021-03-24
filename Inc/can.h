@@ -40,7 +40,7 @@ void MX_CAN_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void Filter_Init(void);
-void Send_Message(void);
+void Send_Message(uint8_t *pData);
 
 extern CAN_FilterTypeDef CAN_FilterInit;
 extern CAN_TxHeaderTypeDef CAN_TxHeaderSend;
