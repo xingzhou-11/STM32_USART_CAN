@@ -48,8 +48,8 @@
 
 /* USER CODE BEGIN PV */
 
-uint8_t RxData[8];
-uint8_t TxData[8];
+uint8_t CAN_RxData[16];
+uint8_t USART_RxData[16];
 
 /* USER CODE END PV */
 
@@ -98,7 +98,7 @@ int main(void)
 	
 	Filter_Init();
 	HAL_CAN_Start(&hcan);
-	HAL_UART_Receive_IT(&huart2, RxData, 8);
+	HAL_UART_Receive_IT(&huart2, CAN_RxData, 8);
 
   /* USER CODE END 2 */
 
@@ -154,38 +154,52 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
 //CAN中断回调函数
 //CAN接收数据传入RxData
 //串口打印can数据
 //将数组RxData清零
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &CAN_RxHeaderSend, RxData);
-	HAL_UART_Transmit(&huart2, RxData, 8, 0xffff);
-//	printf("%x %x %x %x %x %x %x %x\n", RxData[0],RxData[1],RxData[2],RxData[3],RxData[4],RxData[5],RxData[6],RxData[7]);
+	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &CAN_RxHeaderSend, CAN_RxData);
+	HAL_UART_Transmit(&huart2, CAN_RxData, 8, 0xffff);
 	
 	for(uint8_t i=0; i<8; i++)
 	{
-		RxData[i] = 0;
+		CAN_RxData[i] = 0;
 	}
 }
 
 //串口中断回调函数
 //串口接收数据传入RxData
 //确认串口总线空闲
+//检查邮箱状态是否已满
 //CAN将数据传出
 //将数组RxData清零
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-
-	HAL_UART_Receive_IT(&huart2, RxData, 8);
-	while(__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE) == 1);
-	HAL_UART_Transmit(&huart2, RxData, 8, 0xffff);
-	Send_Message(RxData);
+	
+//	for(uint8_t	i=0; i<8; i++)
+//	{
+//		HAL_UART_Receive_IT(&huart2, USART_RxData, 1);
+//	}
+	
+	while(__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE) == 1)
+	{
+		{
+		HAL_UART_Receive_IT(&huart2, USART_RxData, 1);
+		}
+	}
+	
+	if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) < 3)
+	{
+		HAL_UART_Transmit(&huart2, USART_RxData, 8, 0xffff);
+	}
+	Send_Message(USART_RxData);
 	
 	for(uint8_t i=0; i<8; i++)
 	{
-		RxData[i] = 0;
+		USART_RxData[i] = 0;
 	}
 	
 }
